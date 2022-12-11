@@ -122,6 +122,26 @@ static void send_hid_report(uint8_t report_id, uint32_t btn)
       }
     }
     break;
+    case REPORT_ID_KEYBOARD:
+    {
+      // use to avoid send multiple consecutive zero report for keyboard
+      static bool has_keyboard_key = false;
+
+      if ( btn )
+      {
+        uint8_t keycode[6] = { 0 };
+        keycode[0] = HID_KEY_A;
+
+        tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
+        has_keyboard_key = true;
+      }else
+      {
+        // send empty key report if previously has key pressed
+        if (has_keyboard_key) tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
+        has_keyboard_key = false;
+      }
+    }
+    break;
     default: break;
   }
 }
